@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- surface_type=texture_view is what actually lets the loading placeholder's semi-transparent
+     background show through while buffering — the default SurfaceView is composited as its own
+     opaque hardware layer and ignores normal View alpha/z-order entirely, no matter what shutter
+     color is set on it (confirmed live: stayed solid black regardless). TextureView participates
+     in normal View compositing instead, at a small, acceptable extra compositing cost for this
+     small overlay box. -->
+<androidx.media3.ui.PlayerView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/overlay_player_view"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    app:surface_type="texture_view" />

@@ -1,0 +1,268 @@
+show:
+  name: Show TV overlay
+  description: >-
+    Shows a live camera, a video, a photo, a title, and/or a message on top of whatever's already
+    playing on the target TV — without switching away from it. Combine any of
+    camera_entity/video_url/image_url/title/message; at least one is required. video_url takes
+    priority over camera_entity, which takes priority over image_url, for the main visual;
+    title/message are always independently combinable with any of them.
+  target:
+    entity:
+      domain: media_player
+  fields:
+    camera_entity:
+      name: Camera
+      description: A Home Assistant camera entity to show as live video.
+      example: camera.doorbell
+      selector:
+        entity:
+          domain: camera
+    video_url:
+      name: Video URL
+      description: >-
+        A direct video stream to play instead of (or without) a Home Assistant camera entity —
+        HLS, plain HTTP(S), RTSP (a local-network camera's own feed or an internet-exposed one), or
+        a youtube.com/youtu.be link. Bypasses Home Assistant entirely; takes priority over
+        camera_entity if both are set.
+      example: rtsp://192.168.1.50:554/stream1
+      selector:
+        text:
+    image_url:
+      name: Photo URL
+      description: >-
+        A direct photo URL to show instead of live video (ignored if camera_entity is also set).
+        Works with any image URL, including a camera's own snapshot/camera_proxy URL.
+      example: http://homeassistant.local:8123/api/camera_proxy/camera.doorbell
+      selector:
+        text:
+    image_path:
+      name: Photo file path
+      description: >-
+        A local file on this Home Assistant's own disk to show as a photo instead of a URL —
+        ignored if image_url is also set. Only files under the config's www/ folder work (that's
+        the one folder HA serves publicly); give the path as /config/www/... or just www/....
+      example: /config/www/tmp/red.png
+      selector:
+        text:
+    title:
+      name: Title
+      description: A heading shown above the message — combinable with either visual, or on its own.
+      example: Front door
+      selector:
+        text:
+    message:
+      name: Message
+      description: Text shown below the title — combinable with either visual, or on its own.
+      example: Someone's at the door
+      selector:
+        text:
+    icon_url:
+      name: Icon URL
+      description: >-
+        A small inline icon shown first in the title/message block (left of it with a horizontal
+        text_layout, above it with vertical) — not a photo box. Animated WebP/GIF keep playing,
+        e.g. an animated weather icon next to "22°C".
+      example: https://cdn.jsdelivr.net/gh/stathisktm/iris-weather-emoji@main/webp/sunny.webp
+      selector:
+        text:
+    icon_size:
+      name: Icon size
+      description: Square size of the icon_url icon, in dp.
+      default: 32
+      selector:
+        number:
+          min: 8
+          max: 256
+          unit_of_measurement: dp
+          mode: box
+    duration:
+      name: Duration
+      description: Seconds before the overlay auto-hides itself. 0 means it stays until the hide action is called.
+      default: 15
+      selector:
+        number:
+          min: 0
+          max: 300
+          unit_of_measurement: seconds
+          mode: box
+    position:
+      name: Position
+      description: Where on screen the overlay appears.
+      default: bottom_right
+      selector:
+        select:
+          options:
+            - top_left
+            - top_right
+            - bottom_left
+            - bottom_right
+            - center
+    size:
+      name: Size
+      description: How big the video/photo box is. Only affects a video or photo — a message-only overlay is always sized to its text.
+      default: medium
+      selector:
+        select:
+          options:
+            - small
+            - medium
+            - large
+    sound_url:
+      name: Alert sound URL
+      description: >-
+        A direct audio URL to play once as an alert sound, independent of the visual overlay —
+        plays even on a repeated trigger for content that's already showing. Takes priority over
+        chime's bundled default if both are set.
+      selector:
+        text:
+    chime:
+      name: Play chime
+      description: Play a bundled default two-tone doorbell chime once, if sound_url isn't set.
+      default: false
+      selector:
+        boolean:
+    loading_opacity:
+      name: Loading background opacity
+      description: >-
+        How solid the placeholder background looks while a video/photo is still loading, before
+        it appears (0 = fully see-through, 100 = solid black). A small loading spinner shows on
+        top of it either way.
+      default: 25
+      selector:
+        number:
+          min: 0
+          max: 100
+          unit_of_measurement: "%"
+          mode: slider
+    text_position:
+      name: Title/message position
+      description: >-
+        Where the title/message block sits relative to a video or photo — on top of it (along its
+        bottom edge) or as a separate strip directly underneath it. Only matters when there's also
+        a video or photo; title/message alone always renders as its own block either way.
+      default: overlay
+      selector:
+        select:
+          options:
+            - overlay
+            - below
+    text_layout:
+      name: Title/message line layout
+      description: >-
+        Whether the title and message sit stacked (each on its own line) or side by side on one
+        line — e.g. a weather emoji as the title next to a short "22°C" message, both on one row
+        in a small permanent widget.
+      default: vertical
+      selector:
+        select:
+          options:
+            - vertical
+            - horizontal
+    text_background_opacity:
+      name: Title/message background opacity
+      description: How solid the title/message's own background strip is (0 = fully see-through, 100 = solid black).
+      default: 70
+      selector:
+        number:
+          min: 0
+          max: 100
+          unit_of_measurement: "%"
+          mode: slider
+    rounded_corners:
+      name: Rounded corners
+      description: Whether the video/photo box and the title/message background have rounded corners.
+      default: true
+      selector:
+        boolean:
+    ok_webhook_id:
+      name: OK button webhook
+      description: >-
+        Makes this overlay interactive: while it's showing, it takes remote-control focus away from
+        whatever's underneath, and pressing OK/Enter calls this Home Assistant webhook (create one
+        under Settings > Automations > Webhook trigger, and put its ID here) — use it for things
+        like "press OK to unlock the door". BACK dismisses without calling it. Leave empty for a
+        normal, non-interactive overlay that never takes focus.
+      example: tvcam-open-door
+      selector:
+        text:
+    ok_response_message:
+      name: OK confirmation message
+      description: >-
+        Ignored unless ok_webhook_id is also set. Replaces the overlay with this brief confirmation
+        text (e.g. "Door opened") right after OK is pressed and the webhook fires, instead of it
+        just vanishing silently. Combinable with ok_response_image_url/ok_response_image_path.
+        Auto-hides itself a few seconds later.
+      example: Η πόρτα άνοιξε
+      selector:
+        text:
+    ok_response_image_url:
+      name: OK confirmation photo URL
+      description: Ignored unless ok_webhook_id is also set. A photo URL shown alongside (or instead of) ok_response_message in that same brief confirmation.
+      selector:
+        text:
+    ok_response_image_path:
+      name: OK confirmation photo file path
+      description: Same as ok_response_image_url, but a local file path under this Home Assistant's own config/www/ folder instead of a URL — ignored if ok_response_image_url is also set.
+      example: /config/www/tmp/door_open.png
+      selector:
+        text:
+    muted:
+      name: Muted
+      description: Whether the video/camera's own audio track plays or is silenced. Only relevant with camera_entity/video_url — a photo-only or message-only overlay has no audio either way.
+      default: false
+      selector:
+        boolean:
+    slot:
+      name: Slot
+      description: >-
+        A freeform name for which independent overlay this targets. A new call for the same slot
+        replaces only that slot's own overlay; a different slot coexists completely independently
+        — e.g. a permanent "weather" widget in one corner and a separate "temperature" one
+        elsewhere, both up at once alongside the usual camera-stream/message triggers (set
+        duration to 0 to keep a widget up permanently, until explicitly hidden). Leave empty for
+        the normal behavior: any camera/video/photo uses one shared slot, a title/message-only
+        call uses a separate shared slot, so a live stream and a plain notification already
+        coexist without needing this.
+      example: weather
+      selector:
+        text:
+    margin:
+      name: Edge margin
+      description: >-
+        Distance in pixels-independent units (dp) from the screen edge(s) for a non-center
+        position. Lower it (e.g. to 0-2) to hug the very edge — useful for a small permanent
+        status-style widget (weather, temperature, ...) that should sit right at the screen's
+        limit rather than visibly inset from it. Ignored for a center position.
+      default: 16
+      selector:
+        number:
+          min: 0
+          max: 200
+          unit_of_measurement: dp
+          mode: box
+
+hide:
+  name: Hide TV overlay
+  description: >-
+    Immediately hides the overlay on the target TV, regardless of any duration set when it was
+    shown. Without slot, hides everything currently showing, in every slot.
+  target:
+    entity:
+      domain: media_player
+  fields:
+    slot:
+      name: Slot
+      description: Hide only this named slot (see the slot field on the show action), leaving every other slot's overlay untouched. Leave empty to hide everything.
+      example: weather
+      selector:
+        text:
+
+test:
+  name: Test TV overlay
+  description: >-
+    Shows a short centered confirmation message with a chime on the target TV, auto-hiding itself
+    after a few seconds — a real end-to-end check that the whole chain (this integration -> adb ->
+    the companion Android app) is working, visible on the TV itself, no fields to fill in.
+  target:
+    entity:
+      domain: media_player

@@ -1,0 +1,16 @@
+{
+  "domain": "tvcam",
+  "name": "TV Camera Overlay",
+  "codeowners": [
+    "@stathisktm"
+  ],
+  "config_flow": true,
+  "dependencies": [
+    "androidtv"
+  ],
+  "documentation": "https://github.com/stathisktm/ha-tvcam",
+  "iot_class": "local_push",
+  "issue_tracker": "https://github.com/stathisktm/ha-tvcam/issues",
+  "requirements": [],
+  "version": "0.2.0"
+}
