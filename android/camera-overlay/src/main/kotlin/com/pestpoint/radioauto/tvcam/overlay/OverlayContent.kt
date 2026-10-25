@@ -7,6 +7,12 @@ data class OverlayContent(
     /** Ignored when [hlsUrl] is also present — live video wins as the "main visual", [title] and
      *  [message] stay independently combinable with either. */
     val imageUrl: String? = null,
+    /** A live MJPEG stream (HA's own `/api/camera_proxy_stream/<entity>`, sent with
+     *  [mjpegToken] as a Bearer header) — the fallback for a camera entity HA can't give an HLS
+     *  stream for (e.g. Frigate cameras without go2rtc restreaming). Used only when [hlsUrl] is
+     *  null, and wins over [imageUrl]. */
+    val mjpegUrl: String? = null,
+    val mjpegToken: String? = null,
     val title: String? = null,
     val message: String? = null,
     val position: OverlayPosition = OverlayPosition.BOTTOM_END,
@@ -48,9 +54,9 @@ data class OverlayContent(
     val iconUrl: String? = null,
     val iconSizeDp: Int = 32,
 ) {
-    val hasVisual: Boolean get() = hlsUrl != null || imageUrl != null
+    val hasVisual: Boolean get() = hlsUrl != null || mjpegUrl != null || imageUrl != null
     val hasText: Boolean get() = !title.isNullOrBlank() || !message.isNullOrBlank() || iconUrl != null
-    val isEmpty: Boolean get() = hlsUrl == null && imageUrl == null && !hasText
+    val isEmpty: Boolean get() = !hasVisual && !hasText
 }
 
 enum class OverlayPosition {

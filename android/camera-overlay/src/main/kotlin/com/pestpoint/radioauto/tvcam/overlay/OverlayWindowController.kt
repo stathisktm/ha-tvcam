@@ -260,6 +260,28 @@ class OverlayWindowController(private val context: Context) {
             }
             box.addView(playerView, 0)
             views.player = exo
+        } else if (content.mjpegUrl != null) {
+            // Same box behavior as a photo (natural-aspect resize on the first frame), just fed
+            // continuously; teardown cancels imageJob, which closes the HTTP stream.
+            val imageView = ImageView(context).apply { scaleType = ImageView.ScaleType.FIT_CENTER }
+            box.addView(imageView, 0, ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT))
+            views.imageJob = scope.launch {
+                var first = true
+                MjpegStreamReader.play(content.mjpegUrl, content.mjpegToken) { bitmap ->
+                    imageView.setImageBitmap(bitmap)
+                    if (first) {
+                        first = false
+                        Log.d(TAG, "show: first MJPEG frame ${bitmap.width}x${bitmap.height}")
+                        resizeVisualToNaturalAspect(views, box, bitmap.width, bitmap.height, content, density)
+                        box.background = null
+                        spinner.visibility = View.GONE
+                    }
+                }
+                if (first) {
+                    box.setBackgroundColor(Color.BLACK)
+                    spinner.visibility = View.GONE
+                }
+            }
         } else if (content.imageUrl != null) {
             // FIT_CENTER, not CENTER_CROP — the whole photo always stays visible. The box itself
             // then gets resized to the photo's own natural aspect ratio once it's loaded (see

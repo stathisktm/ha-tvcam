@@ -27,6 +27,8 @@ adb shell appops set com.pestpoint.radioauto.tvcam SYSTEM_ALERT_WINDOW allow
 ```
 Για κάμερες του Home Assistant (`camera_entity`) άνοιξε μία φορά την εφαρμογή στην TV και βάλε URL + long-lived token του HA. Για `video_url` / `image_url` / μηνύματα δεν χρειάζεται.
 
+Κάμερες με stream (RTC/go2rtc, generic RTSP) παίζουν ως HLS. Κάμερες **χωρίς** stream, όπως του **Frigate** χωρίς go2rtc restream, MJPEG κ.ά., παίζουν αυτόματα μέσω του MJPEG proxy του HA (`/api/camera_proxy_stream`).
+
 Δοκιμή: **Εργαλεία προγραμματιστή → Ενέργειες → `tvcam.test`**.
 
 ## Παράδειγμα: μόνιμος καιρός με κινούμενο εικονίδιο

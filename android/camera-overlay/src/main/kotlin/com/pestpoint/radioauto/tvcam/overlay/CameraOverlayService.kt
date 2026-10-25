@@ -191,6 +191,8 @@ class CameraOverlayService : Service() {
             // round-trip; a failed resolve doesn't block image_url/message from still showing
             // (e.g. message + a broken camera still shows the message) — only bail out if there's
             // nothing left.
+            var mjpegUrl: String? = null
+            var mjpegToken: String? = null
             val hlsUrl = when {
                 videoUrl != null && YoutubeResolver.isYoutubeUrl(videoUrl) -> YoutubeResolver.resolveStreamUrl(videoUrl)
                 videoUrl != null -> videoUrl
@@ -204,7 +206,17 @@ class CameraOverlayService : Service() {
                     Log.w(TAG, "handleShow: missing HA config")
                     null
                 } else {
-                    HaCameraStreamClient(baseUrl, token).resolveHlsUrl(id)
+                    HaCameraStreamClient(baseUrl, token).resolveHlsUrl(id).also { hls ->
+                        // HA refuses an HLS stream for cameras without stream support ("does not
+                        // support play stream service" — e.g. Frigate cameras when Frigate has no
+                        // go2rtc restream). HA's MJPEG proxy works for every camera entity, so fall
+                        // back to that instead of showing nothing.
+                        if (hls == null) {
+                            mjpegUrl = baseUrl.trimEnd('/') + "/api/camera_proxy_stream/" + id
+                            mjpegToken = token
+                            Log.d(TAG, "handleShow: no HLS for $id, falling back to MJPEG proxy")
+                        }
+                    }
                 }
             }
             Log.d(TAG, "handleShow: hlsUrl=$hlsUrl imageUrl=$imageUrl title=$title message=$message position=$position")
@@ -212,6 +224,8 @@ class CameraOverlayService : Service() {
             val content = OverlayContent(
                 hlsUrl = hlsUrl,
                 imageUrl = imageUrl,
+                mjpegUrl = mjpegUrl,
+                mjpegToken = mjpegToken,
                 title = title,
                 message = message,
                 position = position,
