@@ -25,7 +25,14 @@ class KeepAliveService : Service() {
         startForeground(NOTIFICATION_ID, buildNotification())
     }
 
-    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int = START_STICKY
+    // Every startForegroundService() call needs its own startForeground() within ~5s, not just the
+    // first one that created the service — the receivers call it on every trigger, and on the
+    // slower TV a trigger arriving while it was waking from standby crashed the whole process with
+    // "did not then call Service.startForeground()". Repeating it here is cheap and idempotent.
+    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        startForeground(NOTIFICATION_ID, buildNotification())
+        return START_STICKY
+    }
 
     override fun onBind(intent: Intent?): IBinder? = null
 

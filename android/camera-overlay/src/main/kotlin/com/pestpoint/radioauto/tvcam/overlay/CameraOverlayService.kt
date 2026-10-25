@@ -81,6 +81,9 @@ class CameraOverlayService : Service() {
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        // Each startForegroundService() from CameraOverlayReceiver needs its own startForeground(),
+        // not only the one in onCreate — see KeepAliveService.onStartCommand.
+        startForeground(NOTIFICATION_ID, buildPlaceholderNotification())
         when (intent?.action) {
             ACTION_SHOW_CAMERA -> handleShow(intent)
             ACTION_HIDE_CAMERA -> handleHideAction(intent)
