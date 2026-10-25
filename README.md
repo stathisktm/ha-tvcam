@@ -56,5 +56,9 @@ cd android
 ```
 Χρειάζεται Android SDK (`local.properties` με `sdk.dir`) και JDK 17+.
 
+## Δείτε επίσης
+- [ha-tvpicture](https://github.com/stathisktm/ha-tvpicture): mode εικόνας με μία εντολή
+- [ha-tvchannel](https://github.com/stathisktm/ha-tvchannel): ποιο κανάλι και πρόγραμμα παίζει τώρα
+
 ## Άδεια
 [MIT](LICENSE)
